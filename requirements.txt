@@ -1,0 +1,7 @@
+stanza==1.2.2
+transformers==4.6.1
+translators==5.8.0
+torch==1.9.0
+networkx==2.6.3
+matplotlib==3.4.3
+sentencepiece==0.1.96
