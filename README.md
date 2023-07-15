@@ -1,1 +1,1 @@
-# paraphraser
+# German Paraphrasing Tool
