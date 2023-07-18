@@ -1,4 +1,3 @@
-import csv
 import random
 
 from odenet import *
@@ -10,6 +9,8 @@ from translators import translate_text
 
 class Paraphraser:
     def __init__(self):
+        """Initialize models and pipelines"""
+
         stanza.download('de')
         self.nlp = stanza.Pipeline(lang="de", processors="tokenize,pos")
         self.unmasker = pipeline("fill-mask", model="bert-base-german-cased")
@@ -17,11 +18,28 @@ class Paraphraser:
         self.tokenizer = T5Tokenizer.from_pretrained("t5-base")
     
     def set_seed(self, seed):
+        """
+        Set seed for reproducible paraphrases generated from T5 model.
+
+        Parameters:
+            seed (int): Any number
+        """
+
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
     def truecasing(self, doc):
+        """
+        Since we are using cased models, we need to truecase our input sentences first.
+
+        Parameters:
+            doc = Document object from stanza which holds the annotation (Sentences, POS etc.) of our input sentences
+        
+        Returns:
+            List of truecased sentences
+        """
+
         truecased = []
         for sentence in doc.sentences:
             for word in sentence.words:
@@ -35,6 +53,16 @@ class Paraphraser:
         return truecased
 
     def preprocessing(self, sentences):
+        """
+        Converts the input sentences into a string and hands them over to the stanza pipeline.
+
+        Parameters:
+            sentences (list) - List of input sentences
+        
+        Returns:
+            Stanza Document object of input sentences
+        """
+
         utterances_string = '\n\n'.join(sentences)
         doc = self.nlp(utterances_string)
         truecased = self.truecasing(doc)
@@ -42,6 +70,16 @@ class Paraphraser:
         return doc
 
     def word_substitution(self, doc):
+        """
+        Generates paraphrases through word substitution.
+
+        Parameters:
+            doc = Stanza Document object
+        
+        Returns:
+            List of paraphrases
+        """
+
         unused_tokens = [f"[unused_punctuation{i}]" for i in range(29)]
         synonym_sub = ["ADJA", "ADV", "NN", "NE", "PTKANT", "VVINF", "VVIZU", "ITJ"]
         paraphrases = []
@@ -72,6 +110,16 @@ class Paraphraser:
         return list(set(paraphrases))
 
     def pivot_translation(self, doc):
+        """
+        Generates paraphrases through pivot translation.
+
+        Parameters:
+            doc = Stanza Document object
+        
+        Returns:
+            List of paraphrases
+        """
+
         lang = ["en", "pt", "es", "pl", "ht", "nl", "it", "ja"]
         paraphrases = []
         for sentence in tqdm(doc.sentences):
@@ -100,6 +148,16 @@ class Paraphraser:
         return list(set(paraphrases))
 
     def t5_paraphrase(self, doc):
+        """
+        Generates paraphrases through T5.
+
+        Parameters:
+            doc = Stanza Document object
+        
+        Returns:
+            List of paraphrases
+        """
+
         paraphrases = []
         self.set_seed(42)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -126,6 +184,16 @@ class Paraphraser:
         return list(set(paraphrases))
 
     def paraphrase(self, sentences):
+        """
+        Executes paraphrase generation functions.
+
+        Parameters:
+            sentences (list) = List of input sentences
+
+        Returns:
+            List of generated paraphrases
+        """
+
         doc = self.preprocessing(sentences)
         paraphrases_sub = self.word_substitution(doc)
         paraphrases_pivot = self.pivot_translation(doc)
@@ -135,10 +203,25 @@ class Paraphraser:
         return paraphrases
 
     def save_paraphrases(self, paraphrases, output_file):
+        """
+        Saves generated paraphrases in a textfile.
+
+        Parameters:
+            paraphrases (list) - List of generated paraphrases
+            output_file - Filepath to new output textfile
+        """
         with open(output_file, "w", encoding="utf-8") as file:
             file.write("\n".join(paraphrases))
         print('Paraphrases saved in the text file:', output_file)
 
-    def process_sample_utterances(self, sentences, output_file):
+    def generate(self, sentences, output_file):
+        """
+        Main function to generate and save paraphrases.
+
+        Parameters:
+            sentences (list) - List of input sentences
+            output_file - Filepath to new output textfile 
+        """
+
         paraphrases = self.paraphrase(sentences)
         self.save_paraphrases(paraphrases, output_file)
