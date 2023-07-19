@@ -42,14 +42,10 @@ class Paraphraser:
 
         truecased = []
         for sentence in doc.sentences:
-            for word in sentence.words:
-                if word.xpos in ["NN", "NE"]:
-                    noun = word.text.capitalize()
-                    truecased.append(noun)
-                else:
-                    truecased.append(word.text)
-        truecased = " ".join(truecased)
-        truecased = truecased.replace(" . ", ".\n\n")
+            truecased_sentence = ' '.join(word.text.capitalize() if word.xpos in ["NN", "NE"] else word.text for word in sentence.words)
+            truecased.append(truecased_sentence)
+
+        truecased = " ".join(truecased).replace(" . ", ".\n\n")
         return truecased
 
     def preprocessing(self, sentences):
