@@ -28,7 +28,7 @@ pip install git+https://github.com/hdaSprachtechnologie/odenet
 paraphraser = Paraphraser()
 ```
 
-4. Generate paraphrases from your text file
+4. Generate paraphrases from your text file (input sentences need punctuation for the paraphraser to work properly)
 ```
 paraphraser.generate(YOUR_LIST_OF_INPUT_SENTENCES, OUTPUT_FILE)
 ```
