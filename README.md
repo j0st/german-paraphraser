@@ -17,7 +17,7 @@ Paraphrases were automatically generated in the following ways:
 git clone https://github.com/j0st/german-paraphraser
 ```
 
-2. Install requirements (Odenet need to be installed directly from https://github.com/hdaSprachtechnologie/odenet)
+2. Install requirements (Odenet needs to be installed directly from https://github.com/hdaSprachtechnologie/odenet)
 ```
 pip install -r requirements.txt
 pip install git+https://github.com/hdaSprachtechnologie/odenet
